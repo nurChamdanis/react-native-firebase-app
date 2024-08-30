@@ -1,10 +1,5 @@
 import crashlytics from '@react-native-firebase/crashlytics';
-
-/**
- * Add additional logs before an error event is record, note that recordError or recordCustomError
- * must be called for these log values to be reported and displayed to crashlytics
- * @param message message to be included in log
- */
+ 
 export const log = (message: string): void => crashlytics().log(message);
 
 // Forces any unsent logs to be sent to Firebase if auto collection is disabled

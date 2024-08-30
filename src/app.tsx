@@ -4,6 +4,7 @@ import RNBootSplash from 'react-native-bootsplash';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { AuthProvider, useAuth } from '@auth';
 import { applyBackHandleListener, navigation } from '@utils/navigation';
 import { AppSafeAreaWrapper } from './app.styles';
@@ -15,8 +16,24 @@ const App = () => {
   const { setNavigationReady } = useAppScreens();
   const [sessionLoaded, setSessionLoaded] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [appdwkuExists, setAppdwkuExists] = useState(false);
 
   useEffect(() => {
+    async function loadCOllection(){ 
+      const collectionSnapshot = await firestore().collection('appdwku').get(); 
+      try {
+        const collectionSnapshot = await firestore().collection('appdwku').get();
+        if (!collectionSnapshot.empty) {
+          setAppdwkuExists(true);
+          console.log('Collection appdwku exists.');
+        } else {
+          console.log('Collection appdwku does not exist.');
+        }
+      } catch (error) {
+        console.error('Error checking collection existence: ', error);
+      }
+    }
+
     const unsubscribe = auth().onAuthStateChanged(user => {
       if (user) {
         setIsAuthenticated(true);
