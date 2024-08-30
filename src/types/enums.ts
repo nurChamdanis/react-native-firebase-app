@@ -1,6 +1,8 @@
 export enum ScreenNames {
   AUTH = 'Auth',
   DASHBOARD = 'Dashboard',
+  SETTINGS = "SETTINGS",
+  MAIN_DRAWER = "MAIN_DRAWER",
 }
 
 export enum AnalyticsEventName {

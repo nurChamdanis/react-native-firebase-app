@@ -8,4 +8,6 @@ export interface AuthProviderContext {
   authenticated: boolean;
   currentUser: FirebaseAuthTypes.User | null;
   initialized: boolean;
+  isConfigured: boolean;
+  isAuthenticated: boolean;
 }

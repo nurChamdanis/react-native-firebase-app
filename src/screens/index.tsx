@@ -1,51 +1,27 @@
-import { useAuth } from '@auth';
-import { createStackNavigator } from '@react-navigation/stack';
-import { AppScreensProps, ScreenNames } from '@types';
 import React from 'react';
+import { useAuth } from '@auth';
+import { ScreenNames } from '@types';
 
 import AuthScreen from './auth';
-import DashboardScreen from './dashboard';
+import MainDrawerNavigator from '../MainDrawerNavigator';
 
-// Create a stack navigator
-const Stack = createStackNavigator();
+interface AppNavigatorProps {
+  navigationReady: boolean;
+}
 
-// Default screen header options
-const defaultHeaderOpts = {
-  headerTitleAlign: 'center' as 'center',
-  headerShown: false,
-  headerLeft: undefined,
-};
-
-export default ({ navigationReady }: AppScreensProps) => {
-  // Observe the authenticated state to set stack accordingly
+const AppNavigator: React.FC<AppNavigatorProps> = ({ navigationReady }) => {
   const { initialized, authenticated, currentUser } = useAuth();
 
-  // Block initial render until initiliased
-  // This will otherwise be masked by boot splash
   if (!initialized || !navigationReady) {
-    return null;
+    return null; // Block render until initialized and navigation is ready
   }
 
-  // If not authenticated restrict to unauthenticated screen stack only
   if (!authenticated || !currentUser?.emailVerified) {
-    return (
-      <Stack.Navigator>
-        <Stack.Screen
-          name={ScreenNames.AUTH}
-          component={AuthScreen}
-          options={defaultHeaderOpts}
-        />
-      </Stack.Navigator>
-    );
+    return <AuthScreen />;
   }
 
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name={ScreenNames.DASHBOARD}
-        component={DashboardScreen}
-        options={defaultHeaderOpts}
-      />
-    </Stack.Navigator>
-  );
+  // Return the drawer as the root navigator
+  return <MainDrawerNavigator />;
 };
+
+export default AppNavigator;

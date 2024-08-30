@@ -38,14 +38,27 @@ const Render = () => {
       setLoading(true);
       login(email, password).then(async res => {
         setLoading(false);
-        if (!res.success) {
-          logEvent(AnalyticsEventName.EMAIL_PASSWORD_LOGIN_FAILED);
-          return setMessage(res.desc);
+        console.log(currentUser?.emailVerified);
+        if (res.success) {
+          await refreshUser();  // Refresh the user data to get the latest emailVerified state
+          if (currentUser?.emailVerified) {
+            navigate(ScreenNames.DASHBOARD);
+          } else {
+            setStep(3);  // Prompt the user to verify their email if it's not verified
+          }
+        } else {
+          setMessage(res.desc);
         }
-        if (!currentUser?.emailVerified) {
-          logEvent(AnalyticsEventName.EMAIL_PASSWORD_LOGIN_SUCCESS);
-          return setStep(3);
-        }
+        // if (!res.success) {
+        //   logEvent(AnalyticsEventName.EMAIL_PASSWORD_LOGIN_FAILED);
+        //   return setMessage(res.desc);
+        // }
+        // if (!currentUser?.emailVerified) {
+        //   console.log(currentUser?.emailVerified+" 47");
+
+        //   logEvent(AnalyticsEventName.EMAIL_PASSWORD_LOGIN_SUCCESS);
+        //   return setStep(3);
+        // }
       });
     } else {
       setMessage('Please enter your email and password');
@@ -104,7 +117,7 @@ const Render = () => {
 
   const onVerifyEmail = () => {
     setLoading(true);
-    verifyEmail().then(res => {
+    verifyEmail().then(async res => {
       if (!res?.success) {
         logEvent(AnalyticsEventName.VERIFY_EMAIL_FAILED);
         setLoading(false);
@@ -113,6 +126,7 @@ const Render = () => {
       }
       setVerificationSent(true);
       logEvent(AnalyticsEventName.VERIFY_EMAIL_SUCCESS);
+      await refreshUser();
     });
   };
 
@@ -134,13 +148,17 @@ const Render = () => {
 
   useEffect(() => {
     if (initialized && authenticated) {
-      if (emailVerified) {
-        clearState();
-        return navigate(ScreenNames.DASHBOARD);
-      }
-      return setStep(3);
+      // Refresh the user to ensure we have the latest emailVerified status
+      refreshUser().then(() => {
+        if (currentUser?.emailVerified) {
+          clearState();
+          navigate(ScreenNames.DASHBOARD);
+        } else {
+          setStep(3);  // Move to the verify email step
+        }
+      });
     }
-  }, [initialized, authenticated, emailVerified]);
+  }, [initialized, authenticated, currentUser?.emailVerified]);
 
   return (
     <ScreenWrapper>
